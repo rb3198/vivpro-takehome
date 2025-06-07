@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "justMyCode": false,
+            "args": [
+                "--port",
+                "5000",
+                "--reload",
+                "--playlist_path",
+                "./playlist.json"
+            ],
+            "jinja": true
+        }
+    ]
+}
