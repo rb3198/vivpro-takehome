@@ -1,4 +1,5 @@
-from songs.dal import insert_songs
+from typing import Literal, Union
+from songs.dal import insert_songs, get_songs as get_songs_dl
 from songs.entities import PlaylistInput
 from songs.entities import Song
 
@@ -34,3 +35,6 @@ async def load_playlist(playlist: PlaylistInput):
             )
         songs.append(song)
     await insert_songs(songs)
+
+async def get_songs(title: Union[str, None], order_by: str = 'idx', order: Literal['asc', 'desc'] = 'asc', offset: int = 0, limit: int = 10):
+    return await get_songs_dl(title, order_by, order, offset, limit)
