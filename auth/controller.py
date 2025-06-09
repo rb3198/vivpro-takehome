@@ -13,7 +13,7 @@ async def get_user(username: str, session: Session = Depends(verify_session)):
     user = await get_user_bl(username)
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f'A user with username {username} does not exist.')
-    if session['user_id'] != user.id:
+    if not session or session['user_id'] != user.id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, f'A user may access only their own info.')
     return {
         'id': user.id,

@@ -3,6 +3,8 @@ from songs.entities import Song
 from connection_pool import connection_pool
 from dataclasses import fields
 
+from songs.entities import Rating
+
 async def insert_songs(songs: list[Song]):
     columns = [
         (f.name, f.metadata.get('db', {}).get('name'))
@@ -44,8 +46,7 @@ async def get_songs(title: Union[str, None], order_by: str, order: Literal['asc'
     num_bars,
     num_sections,
     num_segments,
-    class as song_class,
-	ROUND(COALESCE(avg_rating, 0), 1) as rating
+    class as song_class
     FROM songs LEFT JOIN avg_ratings ON songs.id = avg_ratings.song_id AND songs.idx = avg_ratings.song_idx
     '''
     if title:
@@ -84,14 +85,14 @@ async def get_songs(title: Union[str, None], order_by: str, order: Literal['asc'
             num_sections,
             num_segments,
             song_class,
-            rating
         ) in rows:
             songs.append(
                 Song(
                     idx,
                     id,
                     res_title,
-                    rating,
+                    0,
+                    0,
                     danceability,
                     energy,
                     key,
@@ -111,3 +112,42 @@ async def get_songs(title: Union[str, None], order_by: str, order: Literal['asc'
                 )
             )
         return songs
+
+async def get_song_ratings(songs: list[tuple[int, str]], user_id: str = '') -> dict[str, Rating]:
+    sql = '''
+    SELECT 
+        s.id,
+        s.idx,
+        COALESCE(ar.avg_rating, 0) AS avg_rating,
+        COALESCE(r.rating, 0) AS rating
+    FROM songs s
+    LEFT JOIN ratings r ON s.id = r.song_id AND s.idx = r.song_idx AND r.user_id = ?
+    LEFT JOIN avg_ratings ar ON s.id = ar.song_id AND s.idx = ar.song_idx
+    '''
+    values: list[Union[str, int, float]] = [user_id]
+    idx_list = []
+    id_list = []
+    if songs:
+        params = ''
+        for (idx, id) in songs:
+            params += '?,'
+            idx_list.append(idx)
+            id_list.append(id)
+        params = params[0:-1]
+        values.extend(idx_list)
+        values.extend(id_list)
+        sql += f'''
+        WHERE s.idx IN ({params}) AND s.id IN ({params})
+        '''
+    async with connection_pool.connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, values)
+        rows = cursor.fetchall()
+        mapping: dict[str, Rating] = dict()
+        if rows:
+            for (id, idx, avg_rating, user_rating) in rows:
+                mapping[f'{id}_{idx}'] = {
+                    'avg_rating': avg_rating,
+                    'user_rating': user_rating
+                }
+        return mapping

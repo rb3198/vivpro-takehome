@@ -36,7 +36,7 @@ async def create_session(user: User):
     }
     return session
 
-async def verify_session(req: Request, optional=True):
+async def verify_session(req: Request, optional = False):
     auth = req.headers.get('authorization')
     if not auth or not auth.startswith('Bearer '):
         if not optional:
