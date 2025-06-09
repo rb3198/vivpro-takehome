@@ -45,3 +45,9 @@ CREATE TABLE IF NOT EXISTS avg_ratings
 	avg_rating REAL,
 	FOREIGN KEY (song_idx, song_id) REFERENCES songs(idx, id) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS sessions (
+	id VARCHAR PRIMARY KEY,
+	user_id VARCHAR,
+	expires_at TIMESTAMP,
+	FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);

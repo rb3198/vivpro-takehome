@@ -14,6 +14,7 @@ from songs.entities import PlaylistInput
 from songs.controller import songs_api
 from startup_validations import validate_json_file
 from songs.business import load_playlist
+from auth.controller import users_api, auth_api
 
 async def load_playlist_data(playlist_path: Union[str, None]):
     if playlist_path:
@@ -50,11 +51,16 @@ parser.add_argument("--reload", action="store_true", help="Enable auto-reload in
 
 args = parser.parse_args()
 
+def register_routes(app: FastAPI):
+    app.include_router(auth_api)
+    app.include_router(songs_api)
+    app.include_router(users_api)
+
 async def setup_modules(app: FastAPI, playlist_path: Union[str, None]):
     # pre-load data
     await load_playlist_data(playlist_path)
     # Setup routes
-    app.include_router(songs_api, tags=["Songs API"])
+    register_routes(app)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
