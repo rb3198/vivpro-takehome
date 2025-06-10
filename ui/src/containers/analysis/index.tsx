@@ -7,7 +7,7 @@ type Props = {
   tracks?: Track[];
 };
 
-type NumericTrack = Omit<Track, "id" | "title">;
+type NumericTrack = Omit<Track, "id" | "title" | "userRating">;
 const PADDING_VERT = 50;
 const PADDING_LEFT = 50;
 const RADIUS = 5;
@@ -389,7 +389,8 @@ export const Analysis: React.FC<Props> = ({ tracks }) => {
     }
     const [track] = scaledTracks;
     const numericKeys = Object.keys(track).filter(
-      (key) => typeof track[key as keyof Track] === "number"
+      (key) =>
+        typeof track[key as keyof Track] === "number" && key !== "userRating"
     );
     return (
       <div id={styles.chart_axes_menu}>
@@ -398,7 +399,7 @@ export const Analysis: React.FC<Props> = ({ tracks }) => {
           <select defaultValue={xCol} onChange={onXChange}>
             {numericKeys.map((key) => (
               <option key={key} value={key}>
-                {columnNameMap[key as keyof Track]}
+                {columnNameMap[key as keyof NumericTrack]}
               </option>
             ))}
           </select>
@@ -409,7 +410,7 @@ export const Analysis: React.FC<Props> = ({ tracks }) => {
             <select defaultValue={yCol} onChange={onYChange}>
               {numericKeys.map((key) => (
                 <option key={key} value={key}>
-                  {columnNameMap[key as keyof Track]}
+                  {columnNameMap[key as keyof NumericTrack]}
                 </option>
               ))}
             </select>

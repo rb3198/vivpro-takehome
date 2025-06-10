@@ -6,7 +6,7 @@ export const useFetch = <T>() => {
   const [error, setError] = useState<any>();
 
   const fetchResource = useCallback(
-    async (url: string, method: "get" | "patch", body?: BodyInit) => {
+    async (url: string, method: "get" | "patch" | "put", body?: BodyInit) => {
       setLoading(true);
       try {
         const res = await fetch(url, {

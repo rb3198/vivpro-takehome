@@ -113,7 +113,7 @@ export const Table: React.FC<TableProps> = ({
                 className={(stickyIndices.has(idx) && styles.hor_fixed) || ""}
                 onClick={() => sortByKey(key as keyof Track)}
               >
-                {columnNameMap[key as keyof Track]}
+                {columnNameMap[key as keyof Omit<Track, "userRating">]}
                 {(sortedByKey === key && (
                   <BsArrowUp
                     className={styles.sort_arrow}
@@ -126,7 +126,7 @@ export const Table: React.FC<TableProps> = ({
         </thead>
         <tbody>
           {tracks.map((track) => {
-            const { id, rating, duration, idx: trackIdx } = track;
+            const { id, rating, duration, userRating, idx: trackIdx } = track;
             return (
               <tr key={id}>
                 {Object.keys(columnNameMap).map((key, idx) => {
@@ -143,6 +143,7 @@ export const Table: React.FC<TableProps> = ({
                           id={id}
                           idx={trackIdx}
                           rating={rating}
+                          userRating={userRating}
                           setRating={handleRating}
                         />
                       ) : key === "duration" ? (

@@ -72,7 +72,7 @@ export class Track {
     this.userRating = userRating;
   }
 
-  static columnNameMap: Record<keyof Track, string> = {
+  static columnNameMap: Record<keyof Omit<Track, "userRating">, string> = {
     idx: "Index",
     title: "Title",
     rating: "Rating",
@@ -93,7 +93,6 @@ export class Track {
     tempo: "Tempo",
     timeSignature: "Signature",
     valence: "Valence",
-    userRating: "",
   };
 
   static fromSongResponse = (response: SongResponse) => {
@@ -142,6 +141,6 @@ export class Track {
       numSegments: num_segments,
       class: song_class,
       userRating: user_rating,
-    })
-  }
+    });
+  };
 }

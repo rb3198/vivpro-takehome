@@ -7,6 +7,7 @@ import { RiLoader3Line } from "react-icons/ri";
 
 export interface RatingProps {
   rating: number;
+  userRating: number;
   id: string;
   idx: number;
   setRating: (rating: number, id: string, idx: number) => any;
@@ -14,22 +15,18 @@ export interface RatingProps {
 
 export const Rating: React.FC<RatingProps> = (props) => {
   const { fetch: rate, data, error, loading } = useFetch();
-  const { rating, id, idx, setRating } = props;
-  const initRating = useRef(rating);
+  const { rating, id, idx, userRating, setRating } = props;
+  const initRating = useRef(userRating || rating);
   const [hoveredRating, setHoveredRating] = useState(-1);
 
   const handleClick = async (rating: number) => {
     setRating(rating, id, idx);
     await rate(
-      TRACKS_ENDPOINT + `?id=${id}&idx=${idx}`,
-      "patch",
-      JSON.stringify([
-        {
-          op: "replace",
-          path: "/rating",
-          value: rating,
-        },
-      ])
+      `${TRACKS_ENDPOINT}${idx}/${id}`,
+      "put",
+      JSON.stringify({
+        rating,
+      })
     );
   };
 
