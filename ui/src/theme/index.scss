@@ -1,0 +1,74 @@
+@use "sass:map";
+@use "sass:color";
+@use "./screens" as *;
+@use "./z_levels" as *;
+
+$themes: (
+    light: (
+        bg_0: #fff,
+        // bg_1: #E5E5E5,
+        // bg_3: #B2B2B2,
+        bg_1: #fff,
+        bg_2: #ccc,
+        // bg_2: #fff,
+        bg_3: #fff,
+        text_0: #181818,
+        text_1: #484848,
+        theme_toggle_outer: #f1ce06,
+        theme_toggle_inner: color.adjust(#f1ce06, $lightness: 30%),
+        accent: #4424ca,
+        third: #089061,
+        shadow: #d4d4d4,
+        error: #c62828,
+        ),
+    dark: (
+        bg_0: #181818,
+        bg_1: #323232,
+        bg_2: #484848,
+        bg_3: #626262,
+        text_0: #fff,
+        text_1: #aaa,
+        theme_toggle_outer: #fff,
+        theme_toggle_inner: color.adjust(#181818, $lightness: 16%),
+        accent: #5b4fe9,
+        third: #2fbb7f,
+        shadow: transparent,
+        error: #e57373,
+    ),
+);
+
+@mixin themed() {
+    @each $theme, $map in $themes {
+        :global(.theme--#{$theme}) & {
+            $theme-map: (
+                ) !global;
+
+            @each $key, $submap in $map {
+                $value: map.get(map.get($themes, $theme), '#{$key}'
+                );
+            $theme-map: map.merge($theme-map, ($key: $value)) !global;
+        }
+
+        @content;
+        $theme-map: null !global;
+    }
+}
+}
+
+@function getThemeColor($key) {
+    @return map.get($theme-map, $key);
+}
+
+:global(.theme--dark)[data-nav-menu-open="true"]::after, :global(.theme--light)[data-nav-menu-open="true"]::after {
+    @include media("sm", "tablet_portrait") {
+        position: absolute;
+        content: "";
+        display: block;
+        z-index: map.get($z_levels, 1);
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, .5);
+    }
+}

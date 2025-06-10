@@ -8,6 +8,7 @@ from starlette.exceptions import HTTPException
 import argparse
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from common.entities import ErrorResponse
 from songs.entities import PlaylistInput
@@ -69,6 +70,17 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+#region Middlewares
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+#endregion
 
 #region Exception Handlers
 @app.exception_handler(RequestValidationError)

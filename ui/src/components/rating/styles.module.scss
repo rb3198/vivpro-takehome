@@ -1,0 +1,42 @@
+@use "../../theme/" as *;
+#container {
+    display: flex;
+    align-items: center;
+}
+
+.hidden {
+    opacity: 0;
+}
+
+.none {
+    display: none;
+}
+
+.filled {
+    @include themed() {
+        fill: getThemeColor("third");
+        stroke: getThemeColor("text_0");
+    }
+}
+
+.empty {
+    fill: transparent;
+    @include themed() {
+        stroke: getThemeColor("text_0");
+    }
+}
+
+.loader {
+    animation: rotate .5s ease-in-out infinite;
+    margin-left: .309rem;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

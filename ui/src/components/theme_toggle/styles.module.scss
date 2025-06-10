@@ -1,0 +1,71 @@
+@use "../../theme/index.scss" as *;
+@use "../../theme/_z_levels.scss" as *;
+@use "sass:map";
+
+.container {
+    width: 60px;
+    cursor: pointer;
+    height: 30px;
+    position: relative;
+    border-radius: 20%/50%;
+    display: flex;
+    align-items: center;
+
+    @include themed() {
+        background-color: getThemeColor("bg_1");
+        box-shadow: 0 0 4px getThemeColor("shadow");
+    }
+}
+
+.toggle {
+    position: absolute;
+    transform: translateX(5px);
+    border-radius: 50%;
+    height: 22px;
+    width: 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: map.get($z_levels, 2);
+
+    @include themed() {
+        background-color: getThemeColor("theme_toggle_outer");
+        div {
+            background-color: getThemeColor("theme_toggle_inner");
+        }
+    }
+
+    div {
+        height: 15px;
+        width: 15px;
+        border-radius: 50%;
+    }
+}
+
+// Toggled from light mode to dark mode
+.toggle[data-theme="2"] {
+    transition: transform .5s, background-color .25s;
+    transform: translateX(30px);
+}
+
+// Toggled from dark mode to light mode
+.toggle[data-theme="1"] {
+    transition: transform .25s, background-color .25s;
+    transform: translateX(5px);
+}
+
+.iconContainer path {
+    @include themed() {
+        color: getThemeColor("theme_toggle_outer");
+    }
+}
+
+.iconContainer[data-theme="1"] {
+    transition: transform .25s;
+    transform: translateX(35px);
+}
+
+.iconContainer[data-theme="2"] {
+    transition: transform .25s;
+    transform: translateX(8px);
+}
