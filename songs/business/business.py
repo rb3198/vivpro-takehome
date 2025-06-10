@@ -1,5 +1,5 @@
 from typing import Literal, Union
-from songs.dal import insert_songs, get_songs as get_songs_dl, get_song_ratings
+from songs.dal import insert_songs, get_songs as get_songs_dl, get_song_ratings, rate_song as rate_song_dl, get_song_by_idx_id as get_song_by_idx_id_dl
 from songs.entities import PlaylistInput
 from songs.entities import Song
 
@@ -47,3 +47,9 @@ async def get_songs(title: Union[str, None], user_id:str = '', order_by: str = '
                 song.rating = song_mapping[mapping_key]['avg_rating']
                 song.user_rating = song_mapping[mapping_key]['user_rating']
     return songs
+
+async def rate_song(song_idx: int, song_id: str, user_id: str, rating: float):
+    return await rate_song_dl(song_idx, song_id, user_id, rating)
+
+async def get_song_by_idx_id(idx: int, id: str):
+    return await get_song_by_idx_id_dl(idx, id)

@@ -47,7 +47,7 @@ async def get_songs(title: Union[str, None], order_by: str, order: Literal['asc'
     num_sections,
     num_segments,
     class as song_class
-    FROM songs LEFT JOIN avg_ratings ON songs.id = avg_ratings.song_id AND songs.idx = avg_ratings.song_idx
+    FROM songs
     '''
     if title:
         sql += f'''
@@ -151,3 +151,91 @@ async def get_song_ratings(songs: list[tuple[int, str]], user_id: str = '') -> d
                     'user_rating': user_rating
                 }
         return mapping
+
+async def get_song_by_idx_id(song_idx: int, song_id: str):
+    sql = '''
+    SELECT idx,
+    id,
+    title,
+    danceability,
+    energy,
+    key,
+    loudness,
+    mode,
+    acousticness,
+    instrumentalness,
+    liveness,
+    valence,
+    tempo,
+    duration_ms,
+    time_signature,
+    num_bars,
+    num_sections,
+    num_segments,
+    class as song_class
+    FROM songs
+    WHERE song_idx = ? AND song_id = ?
+    '''
+    values = [song_idx, song_id]
+    async with connection_pool.connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, values)
+        rows = cursor.fetchall()
+        if rows:
+            (
+                idx, 
+                id, 
+                res_title, 
+                danceability,
+                energy,
+                key,
+                loudness,
+                mode,
+                acousticness,
+                instrumentalness,
+                liveness,
+                valence,
+                tempo,
+                duration_ms,
+                time_signature,
+                num_bars,
+                num_sections,
+                num_segments,
+                song_class
+            ) = rows[0]
+            return Song(
+                idx,
+                id,
+                res_title,
+                0,
+                0,
+                danceability,
+                energy,
+                key,
+                loudness,
+                mode,
+                acousticness,
+                instrumentalness,
+                liveness,
+                valence,
+                tempo,
+                duration_ms,
+                time_signature,
+                num_bars,
+                num_sections,
+                num_segments,
+                song_class
+            )
+        return None
+
+async def rate_song(song_idx: int, song_id: str, user_id: str, rating: float):
+    sql = '''
+    INSERT INTO ratings (song_idx, song_id, user_id, rating)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(song_idx, song_id, user_id)
+    DO UPDATE SET rating = excluded.rating;
+    '''
+    values = [song_idx, song_id, user_id, rating]
+    async with connection_pool.connection() as conn:
+        conn.execute(sql, values)
+        conn.commit()
