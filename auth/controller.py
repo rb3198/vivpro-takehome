@@ -4,6 +4,7 @@ from fastapi.responses import Response
 
 from auth.business import create_user, get_user, verify_session, create_session, delete_session
 from auth.entities import UserCreation, Session, Credentials
+from auth.business.constants import SESSION_ID_COOKIE
 
 users_api = APIRouter(prefix='/api/users', tags=['User API'])
 auth_api = APIRouter(prefix='/api/sessions', tags=['API for creating sessions'])
@@ -50,7 +51,7 @@ async def login(res: Response, creds: Credentials):
             detail='Invalid credentials'
         )
     session_id = (await create_session(existing_user))['id']
-    res.set_cookie(key='session_id', value=session_id, httponly=True, secure=True)
+    res.set_cookie(key=SESSION_ID_COOKIE, value=session_id, httponly=True, secure=True)
     res.status_code = status.HTTP_201_CREATED
     return res
 

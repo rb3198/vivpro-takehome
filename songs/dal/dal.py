@@ -174,7 +174,7 @@ async def get_song_by_idx_id(song_idx: int, song_id: str):
     num_segments,
     class as song_class
     FROM songs
-    WHERE song_idx = ? AND song_id = ?
+    WHERE idx = ? AND id = ?
     '''
     values = [song_idx, song_id]
     async with connection_pool.connection() as conn:

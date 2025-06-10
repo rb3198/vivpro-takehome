@@ -1,6 +1,7 @@
 from fastapi import HTTPException, Request, status
 import bcrypt
 from uuid6 import uuid6
+from auth.business.constants import SESSION_ID_COOKIE
 from auth.dal import get_user as get_user_db, create_user as create_user_db, create_session as create_session_db, get_session, delete_session as delete_session_dl
 from auth.entities import UserCreation, User, Session
 from datetime import datetime, timedelta, timezone
@@ -31,15 +32,15 @@ async def create_session(user: User):
     return session
 
 async def verify_session(req: Request, optional = False):
-    auth = req.headers.get('authorization')
-    if not auth or not auth.startswith('Bearer '):
+    auth = req.cookies.get(SESSION_ID_COOKIE)
+    if not auth:
         if not optional:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=f'User must be logged in to view this info. Insert a Bearer token in the headers.'
+                detail=f'User must be logged in to view this info. Pass the session cookie with your request.'
             )
         return None
-    session_id = auth.split(' ')[1]
+    session_id = auth
     session = await get_session(session_id)
     if not session:
         raise HTTPException(
