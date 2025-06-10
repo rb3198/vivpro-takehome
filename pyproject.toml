@@ -6,5 +6,7 @@ build-backend = "setuptools.build_meta"
 name="vivpro"
 version="0.0.1"
 dependencies = [
-    "fastapi[standard]"
+    "fastapi[standard]",
+    "uuid6",
+    "bcrypt"
 ]

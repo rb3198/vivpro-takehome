@@ -1,4 +1,5 @@
-from songs.dal import insert_songs
+from typing import Literal, Union
+from songs.dal import insert_songs, get_songs as get_songs_dl, get_song_ratings, rate_song as rate_song_dl, get_song_by_idx_id as get_song_by_idx_id_dl
 from songs.entities import PlaylistInput
 from songs.entities import Song
 
@@ -31,6 +32,24 @@ async def load_playlist(playlist: PlaylistInput):
             tempo=float(playlist_dict['tempo'][idx]),
             valence=float(playlist_dict['valence'][idx]),
             rating=0,
+            user_rating=0
             )
         songs.append(song)
     await insert_songs(songs)
+
+async def get_songs(title: Union[str, None], user_id:str = '', order_by: str = 'idx', order: Literal['asc', 'desc'] = 'asc', offset: int = 0, limit: int = 10):
+    songs = await get_songs_dl(title, order_by, order, offset, limit)
+    if songs:
+        song_mapping = await get_song_ratings([(song.idx, song.id) for song in songs], user_id)
+        for song in songs:
+            mapping_key = f'{song.id}_{song.idx}'
+            if mapping_key in song_mapping:
+                song.rating = song_mapping[mapping_key]['avg_rating']
+                song.user_rating = song_mapping[mapping_key]['user_rating']
+    return songs
+
+async def rate_song(song_idx: int, song_id: str, user_id: str, rating: float):
+    return await rate_song_dl(song_idx, song_id, user_id, rating)
+
+async def get_song_by_idx_id(idx: int, id: str):
+    return await get_song_by_idx_id_dl(idx, id)

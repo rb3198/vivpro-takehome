@@ -6,6 +6,7 @@ class Song:
     id: str = field(metadata={ 'db': { 'insert': True, 'name': 'id' }})
     title: str = field(metadata={ 'db': { 'insert': True, 'name': 'title' }})
     rating: float = field(metadata={ 'db': { 'insert': False, 'name': 'rating' }})
+    user_rating: float = field(metadata={ 'db': { 'insert': False, 'name': 'user_rating' }})
     danceability: float = field(metadata={ 'db': { 'insert': True, 'name': 'danceability' }})
     energy: float = field(metadata={ 'db': { 'insert': True, 'name': 'energy' }})
     key: float = field(metadata={ 'db': { 'insert': True, 'name': 'key' }})
@@ -28,6 +29,7 @@ class Song:
         id: str,
         title: str,
         rating: float,
+        user_rating: float,
         danceability: float,
         energy: float,
         key: float,
@@ -49,6 +51,7 @@ class Song:
         self.id = id
         self.title = title
         self.rating = rating
+        self.user_rating = user_rating
         self.danceability = danceability
         self.energy = energy
         self.key = key
