@@ -2,15 +2,15 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 
-from auth.business import create_user, get_user as get_user_bl, verify_session, create_session, delete_session
+from auth.business import create_user, get_user, verify_session, create_session, delete_session
 from auth.entities import UserCreation, Session, Credentials
 
 users_api = APIRouter(prefix='/api/users', tags=['User API'])
 auth_api = APIRouter(prefix='/api/sessions', tags=['API for creating sessions'])
 
 @users_api.get('/{username}')
-async def get_user(username: str, session: Session = Depends(verify_session)):
-    user = await get_user_bl(username)
+async def service_get_user(username: str, session: Session = Depends(verify_session)):
+    user = await get_user(username)
     if not user:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f'A user with username {username} does not exist.')
     if not session or session['user_id'] != user.id:
@@ -24,6 +24,12 @@ async def get_user(username: str, session: Session = Depends(verify_session)):
 @users_api.post('/')
 async def register(user: UserCreation):
     # Pydantic takes care of the user entity validation.
+    existing_user = await get_user(user.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='User with the same username already exists. Try a different username.'
+        )
     await create_user(user)
     return Response(status_code=status.HTTP_201_CREATED)
 
@@ -31,7 +37,7 @@ async def register(user: UserCreation):
 async def login(res: Response, creds: Credentials):
     username = creds.username
     password = creds.password
-    existing_user = await get_user_bl(username)
+    existing_user = await get_user(username)
     if not existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

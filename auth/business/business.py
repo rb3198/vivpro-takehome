@@ -9,12 +9,6 @@ async def get_user(username: str):
     return await get_user_db(username)
 
 async def create_user(user_creation: UserCreation):
-    existing_user = await get_user(user_creation.username)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='User with the same username already exists. Try a different username.'
-        )
     user = User(
         str(uuid6()),
         user_creation.username, 
