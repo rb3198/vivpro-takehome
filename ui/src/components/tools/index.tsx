@@ -1,22 +1,22 @@
-import React, { useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useContext, useMemo } from "react";
 import styles from "./styles.module.scss";
 import { BiSearch } from "react-icons/bi";
 import { FaCloudDownloadAlt } from "react-icons/fa";
 import { Track } from "../../types/track";
+import { GlobalDataContext } from "../../contexts/global_data_context";
 
 export interface ToolProps {
-  tracks?: Track[];
   searchTitle: string;
   setSearchTitle: (searchTitle: string) => any;
   searchSongs: () => any;
 }
 
 export const Tools: React.FC<ToolProps> = ({
-  tracks,
   searchTitle,
   setSearchTitle,
   searchSongs,
 }) => {
+  const { tracks: trackResource } = useContext(GlobalDataContext);
   const Search = useMemo(() => {
     const onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
       setSearchTitle(e.target.value);
@@ -39,6 +39,7 @@ export const Tools: React.FC<ToolProps> = ({
   }, [searchTitle, setSearchTitle]);
 
   const constructAndDownloadCsv = useCallback(() => {
+    const tracks = trackResource.read();
     if (!tracks || !tracks.length) {
       return;
     }
@@ -60,24 +61,37 @@ export const Tools: React.FC<ToolProps> = ({
     a.click();
     URL.revokeObjectURL(url);
     a.remove();
-  }, [tracks]);
+  }, [trackResource]);
 
-  const DownloadButton = useMemo(() => {
-    return (
-      <button
-        id={styles.download}
-        className={styles.button}
-        onClick={constructAndDownloadCsv}
-      >
-        <FaCloudDownloadAlt />
-        Download CSV
-      </button>
-    );
-  }, [constructAndDownloadCsv]);
   return (
     <div id={styles.container}>
       {Search}
-      {(tracks && tracks.length && DownloadButton) || <></>}
+      <Suspense fallback={null}>
+        <DownloadButton constructAndDownloadCsv={constructAndDownloadCsv} />
+      </Suspense>
     </div>
+  );
+};
+
+interface DownloadButtonProps {
+  constructAndDownloadCsv: () => void;
+}
+
+const DownloadButton: React.FC<DownloadButtonProps> = ({
+  constructAndDownloadCsv,
+}) => {
+  const { tracks: trackResource } = useContext(GlobalDataContext);
+  const tracks = trackResource.read();
+  return tracks.length ? (
+    <button
+      id={styles.download}
+      className={styles.button}
+      onClick={constructAndDownloadCsv}
+    >
+      <FaCloudDownloadAlt />
+      Download CSV
+    </button>
+  ) : (
+    <></>
   );
 };

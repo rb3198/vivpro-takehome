@@ -1,11 +1,8 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useContext, useLayoutEffect, useRef, useState } from "react";
 import styles from "./styles.module.scss";
 import * as d3 from "d3";
 import { Track } from "../../types/track";
-
-type Props = {
-  tracks?: Track[];
-};
+import { GlobalDataContext } from "../../contexts/global_data_context";
 
 type NumericTrack = Omit<Track, "id" | "title" | "userRating">;
 const PADDING_VERT = 50;
@@ -13,12 +10,14 @@ const PADDING_LEFT = 50;
 const RADIUS = 5;
 const N_HIST_BUCKETS = 5;
 
-export const Analysis: React.FC<Props> = ({ tracks }) => {
+export const Analysis: React.FC = () => {
   const [activeChart, setActiveChart] = useState<"scatter" | "hist">("scatter");
   const { columnNameMap } = Track;
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const [xCol, setXCol] = useState<keyof NumericTrack>("acousticness"); // TODO: change to IDX
   const [yCol, setYCol] = useState<keyof NumericTrack>("danceability");
+  const { tracks: trackResource } = useContext(GlobalDataContext);
+  const tracks = trackResource.read();
   const scaledTracks = tracks?.map((track) => ({
     ...track,
     duration: Math.floor(track.duration / 1000),
