@@ -36,7 +36,7 @@ export const Login: React.FC<LoginProps> = () => {
           "message" in error && setsubmissionError(error.message);
         } else {
           setsubmissionError(
-            res.status === 401 ? "Invalid Creds1" : "An unknown error"
+            res.status === 401 ? "Invalid Credentials" : "An unknown error"
           );
         }
       }

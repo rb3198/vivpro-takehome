@@ -1,0 +1,122 @@
+@use "../../theme" as *;
+@use "../../theme/screens" as *;
+
+$border_radius: .618rem;
+
+@mixin spread_out {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    box-sizing: border-box;
+    @include themed() {
+        background: getThemeColor("bg_0");
+    }
+    @include media("sm") {
+        font-size: 12px;
+    }
+}
+
+.card {
+    position: relative;
+    transform-style: preserve-3d;
+    border-radius: $border_radius;
+    animation: fadeInUp .5s ease-out;
+    height: 60vh;
+    aspect-ratio: 3/4;
+}
+
+.card_3d_wrapper {
+    transition: all 600ms ease-out;
+    transform-style: preserve-3d;
+    border-radius: $border_radius;
+    @include spread_out();
+    @include themed() {
+        box-shadow: 0 0 10px getThemeColor("shadow");
+    }
+}
+
+.card_3d_wrapper[data-rotated="true"] {
+    transform: rotateY(180deg);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(25%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#toggle_container {
+    border-radius: $border_radius;
+    position: absolute;
+    top: 16vh;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    width: 10rem;
+    animation: fadeIn .5s ease-out;
+    @include themed() {
+        background-color: getThemeColor("bg_1");
+        box-shadow: 0 0 4px getThemeColor("shadow");
+    }
+}
+
+.toggle_content {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: .618rem;
+    width: 50%;
+    font-weight: 600;
+    border-radius: $border_radius;
+    @include themed() {
+        color: getThemeColor("text_1");
+    }
+}
+
+.toggle_content[data-active="true"] {
+    @include themed() {
+        background-color: getThemeColor("accent");
+        color: white;
+    }
+}
+
+.card_front, .card_back {
+    border-radius: $border_radius;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    @include spread_out();
+    @include themed() {
+        background-color: getThemeColor("bg_1");
+    }
+}
+
+.card_back {
+    transform: rotateY(180deg);
+}

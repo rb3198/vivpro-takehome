@@ -7,6 +7,8 @@ import { TracksTable } from "./containers/table";
 import { Analysis } from "./containers/analysis";
 import { GlobalDataContextProvider } from "./contexts/global_data_context";
 import ErrorBoundary from "./components/error_boundary";
+import { AuthController } from "./components/auth";
+import { NotificationPopup } from "./components/notification_popup";
 
 interface AppProps extends ThemedProps {}
 const App: React.FC<AppProps> = (props) => {
@@ -28,6 +30,10 @@ const App: React.FC<AppProps> = (props) => {
           path: "analysis",
           element: <Analysis />,
         },
+        {
+          path: "auth",
+          element: <AuthController />,
+        },
       ],
     },
   ]);
@@ -35,6 +41,7 @@ const App: React.FC<AppProps> = (props) => {
     <div id={styles.root}>
       <GlobalDataContextProvider>
         <RouterProvider router={router} />
+        <NotificationPopup />
       </GlobalDataContextProvider>
     </div>
   );
