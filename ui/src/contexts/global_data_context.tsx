@@ -3,6 +3,7 @@ import React, {
   useState,
   useEffect,
   PropsWithChildren,
+  useRef,
 } from "react";
 import { Track } from "../types/track";
 import { SongResponse } from "../types/song_response";
@@ -12,6 +13,20 @@ import { UserInfo } from "../types/user_info";
 
 type Resource<T> = {
   read: () => T;
+};
+
+type NotifPopupConfig = {
+  visible: boolean;
+  message: string;
+  duration: number;
+};
+
+const DEFUALT_NOTIF_POPUP_DURATION = 3000;
+
+const defaultNotifPopupConfig = {
+  visible: false,
+  message: "",
+  duration: DEFUALT_NOTIF_POPUP_DURATION,
 };
 
 const wrapPromise = <T,>(promise: Promise<T>): Resource<T> => {
@@ -45,14 +60,20 @@ const emptyTracksPromise = wrapPromise<Track[]>(
 export const GlobalDataContext = createContext<{
   tracks: Resource<Track[]>;
   user?: UserInfo;
+  notifPopupConfig: NotifPopupConfig;
   fetchTracks: (title?: string) => void;
   updateTracks: (newTracks: Track[]) => void;
   setUser: (user: UserInfo) => void;
+  removeUser: () => void;
+  openNotifPopup: (config: NotifPopupConfig) => void;
 }>({
   tracks: emptyTracksPromise,
+  notifPopupConfig: defaultNotifPopupConfig,
   fetchTracks: () => {},
   updateTracks: () => {},
   setUser: () => {},
+  removeUser: () => {},
+  openNotifPopup: () => {},
 });
 
 export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
@@ -61,10 +82,17 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
   const [trackResource, setTrackResource] =
     useState<Resource<Track[]>>(emptyTracksPromise);
   const [user, setUserState] = useState<UserInfo>();
-
+  const [notifPopupConfig, setNotifPopupConfig] = useState(
+    defaultNotifPopupConfig
+  );
+  const notifPopupTimeoutRef = useRef<number>();
   useEffect(() => {
     getUserFromStorage();
     fetchTracks();
+    return () => {
+      const timeout = notifPopupTimeoutRef.current;
+      typeof timeout === "number" && clearTimeout(timeout);
+    };
   }, []);
 
   const getUserFromStorage = () => {
@@ -78,6 +106,11 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
   const setUser = (user: UserInfo) => {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     setUserState(user);
+  };
+
+  const removeUser = () => {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    setUserState(undefined);
   };
 
   const fetchTracks = (title?: string) => {
@@ -119,12 +152,26 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     setTrackResource(wrapPromise(Promise.resolve(tracks)));
   };
 
+  const openNotifPopup = ({
+    message,
+    duration = DEFUALT_NOTIF_POPUP_DURATION,
+  }: NotifPopupConfig) => {
+    setNotifPopupConfig({ visible: true, message, duration });
+    clearTimeout(notifPopupTimeoutRef.current);
+    notifPopupTimeoutRef.current = setTimeout(() => {
+      setNotifPopupConfig(defaultNotifPopupConfig);
+    }, duration);
+  };
+
   const value = {
     user,
     tracks: trackResource,
+    notifPopupConfig,
     fetchTracks,
     updateTracks,
     setUser,
+    removeUser,
+    openNotifPopup,
   };
 
   return (

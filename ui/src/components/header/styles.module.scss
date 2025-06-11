@@ -86,15 +86,17 @@
 #nav > ul > li {
     font-size: 1.309rem;
     margin-right: 2.5vw;
+    position: relative;
+    overflow: visible;
     cursor: pointer;
     @include media("sm", "tablet_portrait") {
-        margin-bottom: 5vw;
+        margin-bottom: 15vw;
         margin-right: 0;
         font-size: 2rem;
     }
 }
 
-#nav > ul > li[data-active="true"] .link , #nav>ul>li:hover .link {
+#nav > ul > li[data-active="true"] .link , #nav>ul>li:hover .link, #logout:hover, .link:hover>p , .link[data-active="true"]>p{
     @include themed() {
         color: getThemeColor("text_0");
     }
@@ -105,4 +107,19 @@
     @include themed() {
         color: getThemeColor("text_1");
     }
+}
+
+#logout {
+    position: absolute;
+    top: 0;
+    opacity: 0;
+    z-index: -1;
+    transition: all .33s ease-out;
+}
+
+#logout[data-visible="true"] {
+    display: block;
+    z-index: 1;
+    opacity: 1;
+    transform: translateY(100%);
 }

@@ -8,12 +8,16 @@ import { BiX } from "react-icons/bi";
 import { Theme } from "../../theme";
 import { Link, useLocation } from "react-router-dom";
 import { GlobalDataContext } from "../../contexts/global_data_context";
+import { useFetch } from "../../hooks/useFetch";
+import { LOGIN_ENDPOINT } from "../../constants/endpoints";
 
 export interface HeaderProps extends ThemedProps {}
 
 export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { user } = useContext(GlobalDataContext);
+  const [logoutVisible, setLogoutVisible] = useState(false);
+  const { user, removeUser, openNotifPopup } = useContext(GlobalDataContext);
+  const { fetchResult } = useFetch();
   const { pathname } = useLocation();
   const toggleMenuOpen = () => {
     setMenuOpen((prevState) => {
@@ -26,6 +30,31 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
       }
       return newState;
     });
+  };
+
+  const toggleLogoutOpen = () => {
+    setLogoutVisible((prev) => !prev);
+  };
+
+  const onLogoutClick = async () => {
+    try {
+      openNotifPopup({ duration: 1000, message: "Logging out", visible: true });
+      const res = await fetchResult(LOGIN_ENDPOINT, "delete");
+      if (res.ok) {
+        removeUser();
+        openNotifPopup({
+          duration: 1000,
+          message: "Logged out!",
+          visible: true,
+        });
+      }
+    } catch (error) {
+      openNotifPopup({
+        duration: 1000,
+        message: "Something went wrong. Please try again.",
+        visible: true,
+      });
+    }
   };
   const renderMenu = () => {
     return (
@@ -47,9 +76,19 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
               </Link>
             </li>
             {!!user ? (
-              <li>
-                {user.username}
-                <p>Logout</p>
+              <li
+                className={styles.link}
+                onClick={toggleLogoutOpen}
+                data-active={logoutVisible}
+              >
+                <p>{user.username}</p>
+                <span
+                  id={styles.logout}
+                  data-visible={logoutVisible}
+                  onClick={onLogoutClick}
+                >
+                  Logout
+                </span>
               </li>
             ) : (
               <li data-active={pathname === "/auth"} onClick={toggleMenuOpen}>
