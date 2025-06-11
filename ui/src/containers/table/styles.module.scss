@@ -1,5 +1,6 @@
 @use "../../theme/screens" as *;
 @use "../../theme/" as *;
+@use "sass:color";
 
 #container {
     height: 92.5vh;
@@ -96,10 +97,16 @@
 
 #track_table th:hover, #track_table th[data-selected="true"] {
     @include themed() {
-        background: linear-gradient(135deg, #667eea 0%, getThemeColor("accent") 100%);
+        background: linear-gradient(135deg, #667eea 0%, getThemeColor("third") 100%);
     }
 }
 
+#track_table td:hover {
+    @include themed() {
+        background-color: color.change($color: getThemeColor("accent"), $alpha: 0.5);
+        color: white;
+    }
+}
 #track_table th:first-of-type {
     border-top-left-radius: 0.309rem;
 }
@@ -162,8 +169,7 @@
 
 .page_no[data-selected="true"], .page_no:hover {
     @include themed() {
-        background-color: getThemeColor("third");
-        border: 2px solid getThemeColor("third");
+        background: linear-gradient(135deg, #667eea 0%, getThemeColor("third") 100%);
         color: #fff;
     }
 }

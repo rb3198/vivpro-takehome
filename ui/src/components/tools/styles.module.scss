@@ -40,7 +40,7 @@ $height: 3rem;
 
 .button:hover {
     @include themed() {
-        background-color: getThemeColor("third");
+        background: linear-gradient(135deg, #667eea 0%, getThemeColor("third") 100%);
     }
 }
 
