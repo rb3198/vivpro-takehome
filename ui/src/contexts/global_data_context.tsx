@@ -7,6 +7,8 @@ import React, {
 import { Track } from "../types/track";
 import { SongResponse } from "../types/song_response";
 import { TRACKS_ENDPOINT } from "../constants/endpoints";
+import { USER_STORAGE_KEY } from "../constants/storage";
+import { UserInfo } from "../types/user_info";
 
 type Resource<T> = {
   read: () => T;
@@ -42,12 +44,15 @@ const emptyTracksPromise = wrapPromise<Track[]>(
 
 export const GlobalDataContext = createContext<{
   tracks: Resource<Track[]>;
+  user?: UserInfo;
   fetchTracks: (title?: string) => void;
   updateTracks: (newTracks: Track[]) => void;
+  setUser: (user: UserInfo) => void;
 }>({
   tracks: emptyTracksPromise,
   fetchTracks: () => {},
   updateTracks: () => {},
+  setUser: () => {},
 });
 
 export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
@@ -55,12 +60,25 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
 }) => {
   const [trackResource, setTrackResource] =
     useState<Resource<Track[]>>(emptyTracksPromise);
-  //   const [settingsResource, setSettingsResource] = useState(null);
+  const [user, setUserState] = useState<UserInfo>();
 
   useEffect(() => {
+    getUserFromStorage();
     fetchTracks();
-    // setUserResource(wrapPromise(userPromise));
   }, []);
+
+  const getUserFromStorage = () => {
+    const userJson = localStorage.getItem(USER_STORAGE_KEY);
+    if (userJson) {
+      const user: UserInfo = JSON.parse(userJson);
+      setUserState(user);
+    }
+  };
+
+  const setUser = (user: UserInfo) => {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    setUserState(user);
+  };
 
   const fetchTracks = (title?: string) => {
     const queryString = `?offset=0&limit=100${
@@ -102,9 +120,11 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
   };
 
   const value = {
+    user,
     tracks: trackResource,
     fetchTracks,
     updateTracks,
+    setUser,
   };
 
   return (
