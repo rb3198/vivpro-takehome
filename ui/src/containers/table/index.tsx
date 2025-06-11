@@ -181,6 +181,7 @@ const Table: React.FC<TableProps> = (props) => {
                 key={key}
                 className={(stickyIndices.has(idx) && styles.hor_fixed) || ""}
                 onClick={() => sortByKey(key as keyof Track)}
+                data-selected={sortedByKey === key}
               >
                 {columnNameMap[key as keyof Omit<Track, "userRating">]}
                 {(sortedByKey === key && (
