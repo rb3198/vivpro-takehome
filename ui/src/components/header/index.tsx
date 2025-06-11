@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { ThemedProps } from "../../types/interfaces/themed_props";
 import styles from "./styles.module.scss";
 import { Logo } from "../logo";
@@ -7,11 +7,13 @@ import { TbMenuDeep } from "react-icons/tb";
 import { BiX } from "react-icons/bi";
 import { Theme } from "../../theme";
 import { Link, useLocation } from "react-router-dom";
+import { GlobalDataContext } from "../../contexts/global_data_context";
 
 export interface HeaderProps extends ThemedProps {}
 
 export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user } = useContext(GlobalDataContext);
   const { pathname } = useLocation();
   const toggleMenuOpen = () => {
     setMenuOpen((prevState) => {
@@ -44,6 +46,18 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
                 Analysis
               </Link>
             </li>
+            {!!user ? (
+              <li>
+                {user.username}
+                <p>Logout</p>
+              </li>
+            ) : (
+              <li data-active={pathname === "/auth"} onClick={toggleMenuOpen}>
+                <Link to={"/auth"} className={styles.link}>
+                  Login
+                </Link>
+              </li>
+            )}
           </ul>
           <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         </nav>

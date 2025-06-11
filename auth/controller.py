@@ -51,7 +51,7 @@ async def login(res: Response, creds: Credentials):
             detail='Invalid credentials'
         )
     session_id = (await create_session(existing_user))['id']
-    res.set_cookie(key=SESSION_ID_COOKIE, value=session_id, httponly=True, secure=True)
+    res.set_cookie(key=SESSION_ID_COOKIE, value=session_id, httponly=True, secure=True, samesite="none")
     res.status_code = status.HTTP_201_CREATED
     return res
 
