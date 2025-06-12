@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./styles.module.scss";
 import { Star } from "../icons/star";
 import { useFetch } from "../../hooks/useFetch";
 import { TRACKS_ENDPOINT } from "../../constants/endpoints";
 import { RiLoader3Line } from "react-icons/ri";
+import { GlobalDataContext } from "../../contexts/global_data_context";
+import { Tooltip } from "react-tooltip";
 
 export interface RatingProps {
   rating: number;
@@ -15,6 +17,7 @@ export interface RatingProps {
 
 export const Rating: React.FC<RatingProps> = (props) => {
   const { fetch: rate, data, error, loading } = useFetch();
+  const { user } = useContext(GlobalDataContext);
   const { rating, id, idx, userRating, setRating } = props;
   const initRating = useRef(userRating || rating);
   const [hoveredRating, setHoveredRating] = useState(-1);
@@ -58,27 +61,38 @@ export const Rating: React.FC<RatingProps> = (props) => {
     return 0;
   };
   return (
-    <div id={styles.container}>
-      {[1, 2, 3, 4, 5].map((r) => {
-        return (
-          <Star
-            key={r}
-            rating={r}
-            fillPercentage={getFillPercentage(r)}
-            setHoveredRating={setHoveredRating}
-            setRating={handleClick}
-            width={"1.309rem"}
-            emptyClassName={styles.empty}
-            filledClassName={styles.filled}
-          />
-        );
-      })}
-      <RiLoader3Line
-        className={`${styles.loader} ${styles.hidden} ${
-          (loading && styles.none) || ""
-        }`}
-      />
-      {loading && <RiLoader3Line className={styles.loader} />}
-    </div>
+    <>
+      <div id={styles.container} data-tooltip-id={"unable_rate_tooltip"}>
+        {[1, 2, 3, 4, 5].map((r) => {
+          return (
+            <Star
+              key={r}
+              rating={r}
+              fillPercentage={getFillPercentage(r)}
+              setHoveredRating={setHoveredRating}
+              setRating={handleClick}
+              width={"1.309rem"}
+              emptyClassName={styles.empty}
+              filledClassName={styles.filled}
+              disabled={!user}
+            />
+          );
+        })}
+        <RiLoader3Line
+          className={`${styles.loader} ${styles.hidden} ${
+            (loading && styles.none) || ""
+          }`}
+        />
+        {loading && <RiLoader3Line className={styles.loader} />}
+      </div>
+      {!user && (
+        <Tooltip
+          id="unable_rate_tooltip"
+          place="bottom"
+          content="Please login to rate this song!"
+          variant="dark"
+        />
+      )}
+    </>
   );
 };

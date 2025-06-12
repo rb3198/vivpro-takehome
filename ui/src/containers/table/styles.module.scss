@@ -96,6 +96,7 @@
 }
 
 #track_table th:hover, #track_table th[data-selected="true"] {
+    color: white;
     @include themed() {
         background: linear-gradient(135deg, #667eea 0%, getThemeColor("third") 100%);
     }

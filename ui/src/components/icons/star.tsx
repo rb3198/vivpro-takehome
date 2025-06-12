@@ -7,6 +7,7 @@ interface StarProps extends React.SVGProps<SVGSVGElement> {
   emptyClassName: string;
   setRating: (rating: number) => any;
   setHoveredRating: (rating: number) => any;
+  disabled?: boolean;
 }
 
 export const Star: React.FC<StarProps> = (props) => {
@@ -15,6 +16,7 @@ export const Star: React.FC<StarProps> = (props) => {
     fillPercentage,
     filledClassName,
     emptyClassName,
+    disabled,
     setHoveredRating,
     setRating,
   } = props;
@@ -29,6 +31,7 @@ export const Star: React.FC<StarProps> = (props) => {
     "className",
     "filledClassName",
     "emptyClassName",
+    "disabled",
   ]);
   const svgProps = Object.keys(props)
     .filter((key) => !forbiddenKeys.has(key))
@@ -37,11 +40,9 @@ export const Star: React.FC<StarProps> = (props) => {
       return obj;
     }, {});
 
-  const onMouseOver = () => setHoveredRating(rating);
+  const onMouseOver = () => !disabled && setHoveredRating(rating);
   const onMouseOut = () => setHoveredRating(-1);
-  const handleClick = () => {
-    setRating(rating);
-  };
+  const handleClick = () => !disabled && setRating(rating);
   const id = useId();
   return (
     <svg
@@ -49,7 +50,7 @@ export const Star: React.FC<StarProps> = (props) => {
       viewBox="-50 -48 100 96"
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
-      style={{ cursor: "pointer" }}
+      style={{ cursor: disabled ? "default" : "pointer" }}
       onClick={handleClick}
     >
       <defs>
