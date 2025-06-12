@@ -10,6 +10,7 @@ import { SongResponse } from "../types/song_response";
 import { TRACKS_ENDPOINT } from "../constants/endpoints";
 import { USER_STORAGE_KEY } from "../constants/storage";
 import { UserInfo } from "../types/user_info";
+import { useFetch } from "../hooks/useFetch";
 
 type Resource<T> = {
   read: () => T;
@@ -81,6 +82,7 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
 }) => {
   const [trackResource, setTrackResource] =
     useState<Resource<Track[]>>(emptyTracksPromise);
+  const { fetchResult } = useFetch();
   const [user, setUserState] = useState<UserInfo>();
   const [notifPopupConfig, setNotifPopupConfig] = useState(
     defaultNotifPopupConfig
@@ -117,7 +119,7 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     const queryString = `?offset=0&limit=100${
       (title && `&title=${title}`) || ""
     }`;
-    const trackPromise = fetch(TRACKS_ENDPOINT + queryString)
+    const trackPromise = fetchResult(TRACKS_ENDPOINT + queryString, "get")
       .then(async (res) => {
         if (res.ok) {
           const songResponses = (await res.json()) as SongResponse[];

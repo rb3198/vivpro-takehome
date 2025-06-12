@@ -1,4 +1,6 @@
 @use "../../theme/" as *;
+@use "sass:color";
+
 #container {
     display: flex;
     align-items: center;
@@ -17,6 +19,32 @@
         fill: getThemeColor("third");
         stroke: getThemeColor("text_0");
     }
+}
+
+.user_filled {
+    @include themed() {
+        fill: getThemeColor("accent");
+        stroke: getThemeColor("text_0");
+    }
+}
+
+.you_rated_label {
+    font-size: .618rem;
+    opacity: 0;
+    margin-left: .309rem;
+    padding: .309rem;
+    text-transform: uppercase;
+    width: 4rem;
+    border-radius: .309rem;
+    font-weight: 600;
+    @include themed() {
+        background-color:  color.adjust(getThemeColor("text_1"), $lightness: 25%);
+        color: getThemeColor("bg_0");
+    }
+}
+
+.you_rated_label[data-present="true"] {
+    opacity: 1;
 }
 
 .empty {

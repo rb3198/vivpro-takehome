@@ -16,7 +16,7 @@ export interface RatingProps {
 }
 
 export const Rating: React.FC<RatingProps> = (props) => {
-  const { fetchResult: rate, data, error, loading } = useFetch();
+  const { fetchResult: rate, error, loading } = useFetch();
   const { user, removeUser, openNotifPopup } = useContext(GlobalDataContext);
   const { rating, id, idx, userRating, setRating } = props;
   const initRating = useRef(userRating || rating);
@@ -64,11 +64,11 @@ export const Rating: React.FC<RatingProps> = (props) => {
     }
   }, [error, id, idx]);
 
+  const finalRating = userRating || rating;
   const getFillPercentage = (r: number) => {
     if (hoveredRating > 0) {
       return r <= hoveredRating ? 100 : 0;
     }
-    const finalRating = userRating || rating;
     if (r <= finalRating) {
       return 100;
     }
@@ -91,17 +91,22 @@ export const Rating: React.FC<RatingProps> = (props) => {
               setRating={handleClick}
               width={"1.309rem"}
               emptyClassName={styles.empty}
-              filledClassName={styles.filled}
+              filledClassName={
+                finalRating === userRating || hoveredRating >= r
+                  ? styles.user_filled
+                  : styles.filled
+              }
               disabled={!user}
             />
           );
         })}
-        <RiLoader3Line
-          className={`${styles.loader} ${styles.hidden} ${
-            (loading && styles.none) || ""
-          }`}
-        />
         {loading && <RiLoader3Line className={styles.loader} />}
+        <p
+          className={styles.you_rated_label}
+          data-present={userRating === finalRating}
+        >
+          {(userRating === finalRating && "You Rated") || ""}
+        </p>
       </div>
       {!user && (
         <Tooltip
