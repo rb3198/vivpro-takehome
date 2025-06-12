@@ -22,7 +22,7 @@ export const Rating: React.FC<RatingProps> = (props) => {
   const handleClick = async (rating: number) => {
     setRating(rating, id, idx);
     await rate(
-      `${TRACKS_ENDPOINT}${idx}/${id}`,
+      `${TRACKS_ENDPOINT}${idx}/${id}/rating`,
       "put",
       JSON.stringify({
         rating,
@@ -43,11 +43,19 @@ export const Rating: React.FC<RatingProps> = (props) => {
     }
   }, [error, id, idx]);
 
-  const getClasses = (r: number) => {
+  const getFillPercentage = (r: number) => {
     if (hoveredRating > 0) {
-      return r <= hoveredRating ? styles.filled : styles.empty;
+      return r <= hoveredRating ? 100 : 0;
     }
-    return r <= rating ? styles.filled : styles.empty;
+    const finalRating = userRating || rating;
+    if (r <= finalRating) {
+      return 100;
+    }
+    if (Math.floor(finalRating) === r - 1) {
+      const fraction = finalRating - Math.floor(finalRating);
+      return fraction * 100;
+    }
+    return 0;
   };
   return (
     <div id={styles.container}>
@@ -56,10 +64,12 @@ export const Rating: React.FC<RatingProps> = (props) => {
           <Star
             key={r}
             rating={r}
+            fillPercentage={getFillPercentage(r)}
             setHoveredRating={setHoveredRating}
             setRating={handleClick}
             width={"1.309rem"}
-            className={getClasses(r)}
+            emptyClassName={styles.empty}
+            filledClassName={styles.filled}
           />
         );
       })}

@@ -1,13 +1,23 @@
-import React from "react";
+import React, { useId } from "react";
 
 interface StarProps extends React.SVGProps<SVGSVGElement> {
   rating: number;
+  fillPercentage: number;
+  filledClassName: string;
+  emptyClassName: string;
   setRating: (rating: number) => any;
   setHoveredRating: (rating: number) => any;
 }
 
 export const Star: React.FC<StarProps> = (props) => {
-  const { rating, className, setHoveredRating, setRating } = props;
+  const {
+    rating,
+    fillPercentage,
+    filledClassName,
+    emptyClassName,
+    setHoveredRating,
+    setRating,
+  } = props;
   const forbiddenKeys = new Set([
     "fill",
     "rating",
@@ -17,6 +27,8 @@ export const Star: React.FC<StarProps> = (props) => {
     "onMouseOut",
     "onClick",
     "className",
+    "filledClassName",
+    "emptyClassName",
   ]);
   const svgProps = Object.keys(props)
     .filter((key) => !forbiddenKeys.has(key))
@@ -30,6 +42,7 @@ export const Star: React.FC<StarProps> = (props) => {
   const handleClick = () => {
     setRating(rating);
   };
+  const id = useId();
   return (
     <svg
       {...svgProps}
@@ -39,10 +52,27 @@ export const Star: React.FC<StarProps> = (props) => {
       style={{ cursor: "pointer" }}
       onClick={handleClick}
     >
+      <defs>
+        <clipPath id={id}>
+          <rect x="-50" y="-48" width={fillPercentage} height="96" />
+        </clipPath>
+      </defs>
+
+      {/* Background star (empty/outline) */}
       <polygon
         points="0,-40 12.36,-12.36 40,-12.36 18.18,4.55 24.72,31.8 0,18.18 -24.72,31.8 -18.18,4.55 -40,-12.36 -12.36,-12.36"
-        className={className}
+        className={emptyClassName}
         strokeWidth="2"
+        fill="none"
+        stroke="currentColor"
+      />
+
+      {/* Filled portion */}
+      <polygon
+        points="0,-40 12.36,-12.36 40,-12.36 18.18,4.55 24.72,31.8 0,18.18 -24.72,31.8 -18.18,4.55 -40,-12.36 -12.36,-12.36"
+        className={filledClassName}
+        strokeWidth="2"
+        clipPath={`url(#${id})`}
       />
     </svg>
   );
