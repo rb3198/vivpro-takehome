@@ -1,20 +1,49 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python Debugger: FastAPI",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/main.py",
-            "justMyCode": false,
-            "args": [
-                "--port",
-                "5000",
-                "--reload",
-                "--playlist_path",
-                "./playlist.json"
-            ],
-            "jinja": true
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FastAPI Debugger",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/main.py",
+      "justMyCode": false,
+      "args": [
+        "--port",
+        "5000",
+        "--reload",
+        "--playlist_path",
+        "./playlist.json"
+      ],
+      "console": "integratedTerminal",
+      "presentation": {
+        "group": "dev-servers"
+      },
+      "env": {
+        "ENV": "dev"
+      },
+      "jinja": true
+    },
+    {
+      "name": "Launch UI",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "env": {
+        "ENV": "dev"
+      },
+      "cwd": "${workspaceFolder}/ui",
+      "presentation": {
+        "group": "dev-servers"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack Debugger",
+      "configurations": ["Launch UI", "FastAPI Debugger"],
+      "presentation": {
+        "group": "dev-servers"
+      }
+    }
+  ]
 }
