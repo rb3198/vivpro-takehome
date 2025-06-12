@@ -69,6 +69,7 @@ export const Login: React.FC<LoginProps> = () => {
   return (
     <div id={styles.container}>
       <Form
+        formName="login"
         title="Welcome Back"
         subtitle="Please sign in to your account"
         submitLabel={loading ? "Signing In..." : "Sign In"}

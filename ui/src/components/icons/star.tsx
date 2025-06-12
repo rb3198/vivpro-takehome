@@ -32,6 +32,7 @@ export const Star: React.FC<StarProps> = (props) => {
     "filledClassName",
     "emptyClassName",
     "disabled",
+    "fillPercentage",
   ]);
   const svgProps = Object.keys(props)
     .filter((key) => !forbiddenKeys.has(key))

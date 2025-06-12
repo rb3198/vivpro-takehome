@@ -13,6 +13,7 @@ export interface FormProps {
   fields: FieldConfig;
   submitLabel: string;
   submitDisabled?: boolean;
+  formName: string;
   onSubmit?: (fields: Record<string, string>) => any;
   submissionError?: string;
 }
@@ -26,6 +27,7 @@ const getFieldState = (fields: FieldConfig) => {
 };
 export const Form: React.FC<FormProps> = (props) => {
   const {
+    formName,
     title,
     subtitle,
     fields,
@@ -72,17 +74,17 @@ export const Form: React.FC<FormProps> = (props) => {
   };
   return (
     <>
-      <div id={styles.header}>
+      <div className={styles.header}>
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
-      <form onSubmit={onSubmit} id={styles.form}>
-        <div id={styles.fields_container}>
+      <form onSubmit={onSubmit} className={styles.form}>
+        <div className={styles.fields_container}>
           {Object.entries(fields).map(([fieldName, field]) => {
             const { label, type, required, placeholder } = field;
-            const id = `form_${fieldName}`;
+            const id = `form_${formName}_${fieldName}`;
             return (
-              <div className={styles.form_group}>
+              <div className={styles.form_group} key={id}>
                 <label htmlFor={id}>{label}</label>
                 <input
                   type={type}
@@ -103,13 +105,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
         <button
           type="submit"
-          id={styles.submit}
+          className={styles.submit}
           disabled={errorsExist || submitDisabled}
         >
           {submitLabel}
         </button>
       </form>
-      <p id={styles.submission_error} data-visible={!!submissionError}>
+      <p className={styles.submission_error} data-visible={!!submissionError}>
         {submissionError || "p"}
       </p>
     </>

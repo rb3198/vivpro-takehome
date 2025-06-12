@@ -111,6 +111,7 @@ export const Register: React.FC<RegisterProps> = () => {
   return (
     <div id={styles.container}>
       <Form
+        formName="register"
         title="Register"
         subtitle=""
         submitLabel={loading ? "Registering..." : "Register"}
