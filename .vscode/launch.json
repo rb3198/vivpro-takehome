@@ -19,7 +19,8 @@
         "group": "dev-servers"
       },
       "env": {
-        "ENV": "dev"
+        "ENV": "dev",
+        "LAUNCHER": "vs_code"
       },
       "jinja": true
     },

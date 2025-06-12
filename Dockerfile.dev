@@ -20,5 +20,6 @@ COPY . .
 ENV ENV=dev
 EXPOSE 5000
 EXPOSE 5173
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000", "--reload"]
+ARG playlistPath=./playlist.json
+ENV PLAYLIST_PATH=$playlistPath
+CMD ["python", "main.py", "--port", "5000", "--host", "0.0.0.0", "-pp", "$PLAYLIST_PATH"]
