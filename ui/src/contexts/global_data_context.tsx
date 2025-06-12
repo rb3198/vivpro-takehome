@@ -119,7 +119,10 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     const queryString = `?offset=0&limit=100${
       (title && `&title=${title}`) || ""
     }`;
-    const trackPromise = fetchResult(TRACKS_ENDPOINT + queryString, "get")
+    const trackPromise: Promise<Track[]> = fetchResult(
+      TRACKS_ENDPOINT + queryString,
+      "get"
+    )
       .then(async (res) => {
         if (res.ok) {
           const songResponses = (await res.json()) as SongResponse[];
@@ -136,6 +139,12 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
             res.text(),
             res.statusText
           );
+          if (res.status === 401) {
+            removeUser();
+            // Retry without user
+            fetchTracks();
+            return [];
+          }
           throw new Error(
             "Failed to fetch tracks. Something went wrong, please try again."
           );

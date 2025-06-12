@@ -11,6 +11,7 @@ import argparse
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
+from auth.business.constants import SESSION_ID_COOKIE
 from common.entities import ErrorResponse
 from songs.entities import PlaylistInput
 from startup_utils import add_middlewares, validate_json_file, add_startup_arguments, register_routes
@@ -88,10 +89,13 @@ async def req_validation_failure_handler(req: Request, ex: RequestValidationErro
 @app.exception_handler(HTTPException)
 async def http_exception_handler(req: Request, ex: HTTPException):
     detail = ex.detail if isinstance(ex.detail, str) else ex.detail.get("error", str(ex.detail))
-    return JSONResponse(
+    res = JSONResponse(
         ErrorResponse(ex.status_code, detail).__dict__,
         status_code=ex.status_code
     )
+    if ex.status_code == status.HTTP_401_UNAUTHORIZED:
+        res.delete_cookie(SESSION_ID_COOKIE)
+    return res
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception):
@@ -104,8 +108,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 #endregion
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", port=args.port, host=args.host, reload=args.reload)
     print(ENV, LAUNCHER)
     if ENV == "dev" and LAUNCHER != "vs_code":
         process = subprocess.Popen(
@@ -115,3 +117,5 @@ if __name__ == "__main__":
         )
         vite_process = process
         print(f"Vite dev server started with PID: {process.pid}")
+    import uvicorn
+    uvicorn.run("main:app", port=args.port, host=args.host, reload=args.reload)
