@@ -1,9 +1,11 @@
 from argparse import ArgumentParser
 from typing import Union, cast
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from pydantic_core import ErrorDetails
+import os;
 
 from songs.entities.playlist_input import PlaylistInput
 from auth.controller import users_api, auth_api
@@ -52,16 +54,24 @@ def add_startup_arguments(parser: ArgumentParser):
         "--playlist_path", 
         help="Path of the file to pre-load song data.\nIf no file path is given, the program loads an empty / already existing database."
     )
+    parser.add_argument("--host", type=str, default="0.0.0.0")
     parser.add_argument("-p", "--port", type=int, default=8000)
     parser.add_argument("--env", choices=["dev", "prod"], default="dev")
     parser.add_argument("--reload", action="store_true", help="Enable auto-reload in uvicorn")
     args = parser.parse_args()
     return args
 
-def register_routes(app: FastAPI):
-    app.include_router(auth_api)
-    app.include_router(songs_api)
-    app.include_router(users_api)
+def register_frontend(app: FastAPI, env: Union[str, None] = "dev"):
+    if env == "prod":
+        app.mount("/", StaticFiles(directory=os.path.join(".", "ui", "dist"), html=True), name="static")
+
+def register_routes(app: FastAPI, env: Union[str, None] = "dev"):
+    api_router = APIRouter()
+    api_router.include_router(auth_api)
+    api_router.include_router(songs_api)
+    api_router.include_router(users_api)
+    app.include_router(api_router, prefix="/api")
+    register_frontend(app, env)
 
 def add_middlewares(app: FastAPI, env: Union[str, None] = "dev"):
     # Add CORS on Dev environment for frontend requests.

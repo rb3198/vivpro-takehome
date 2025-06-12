@@ -9,7 +9,6 @@ from starlette.exceptions import HTTPException
 import argparse
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from common.entities import ErrorResponse
 from songs.entities import PlaylistInput
@@ -50,8 +49,10 @@ args = add_startup_arguments(parser)
 async def setup_modules(app: FastAPI, playlist_path: Union[str, None]):
     # pre-load data
     await load_playlist_data(playlist_path)
+    # Add middlewares
+    add_middlewares(app, ENV)
     # Setup routes
-    register_routes(app)
+    register_routes(app, ENV)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,9 +61,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-
-# Add middlewares
-add_middlewares(app, ENV)
 
 #region Exception Handlers
 @app.exception_handler(RequestValidationError)
@@ -101,4 +99,4 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", port=args.port, reload=args.reload)
+    uvicorn.run("main:app", port=args.port, host=args.host, reload=args.reload)

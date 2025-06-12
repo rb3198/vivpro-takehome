@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+const { DEV } = import.meta.env;
 
 export const useFetch = <T>(
   onSuccess?: (res: T) => unknown,
@@ -7,7 +8,7 @@ export const useFetch = <T>(
   const [data, setData] = useState<T>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<any>();
-
+  const credentials = DEV ? "include" : "same-origin";
   /**
    * A method which does NOT update the data on request completion.
    * @returns the raw response.
@@ -25,7 +26,7 @@ export const useFetch = <T>(
         method: method.toUpperCase(),
         body,
         headers,
-        credentials: "include",
+        credentials,
       }).finally(() => setLoading(false));
     },
     []
@@ -45,7 +46,7 @@ export const useFetch = <T>(
           method: method.toUpperCase(),
           body,
           headers,
-          credentials: "include",
+          credentials,
         });
         let data = undefined;
         if (res.ok) {
