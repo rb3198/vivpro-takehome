@@ -4,9 +4,10 @@ from fastapi.responses import Response
 
 from auth.business import create_user, get_user, verify_session, create_session, delete_session
 from auth.entities import UserCreation, Session, Credentials
+from auth.business.constants import SESSION_ID_COOKIE
 
-users_api = APIRouter(prefix='/api/users', tags=['User API'])
-auth_api = APIRouter(prefix='/api/sessions', tags=['API for creating sessions'])
+users_api = APIRouter(prefix='/users', tags=['User API'])
+auth_api = APIRouter(prefix='/sessions', tags=['API for creating sessions'])
 
 @users_api.get('/{username}')
 async def service_get_user(username: str, session: Session = Depends(verify_session)):
@@ -50,7 +51,7 @@ async def login(res: Response, creds: Credentials):
             detail='Invalid credentials'
         )
     session_id = (await create_session(existing_user))['id']
-    res.set_cookie(key='session_id', value=session_id, httponly=True, secure=True)
+    res.set_cookie(key=SESSION_ID_COOKIE, value=session_id, httponly=True, secure=True, samesite="none")
     res.status_code = status.HTTP_201_CREATED
     return res
 
@@ -60,4 +61,6 @@ async def logout(session: Session = Depends(verify_session)):
     if not deleted:
         # Said session was not present
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return Response(None, status.HTTP_204_NO_CONTENT)
+    res = Response(None, status.HTTP_204_NO_CONTENT)
+    res.delete_cookie(key=SESSION_ID_COOKIE)
+    return res

@@ -5,7 +5,7 @@ from auth.business import verify_session
 from .validations import validate_get_songs_req
 from .business import get_songs, rate_song, get_song_by_idx_id
 
-songs_api = APIRouter(prefix='/api/songs', tags=['Songs API'])
+songs_api = APIRouter(prefix='/songs', tags=['Songs API'])
 
 async def get_optional_session(request: Request):
     return await verify_session(request, optional=True)

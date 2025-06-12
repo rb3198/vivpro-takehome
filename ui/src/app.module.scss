@@ -1,0 +1,7 @@
+@use "./theme/" as *;
+
+#root {
+    @include themed() {
+        background-color: getThemeColor("bg_0");
+    }
+}

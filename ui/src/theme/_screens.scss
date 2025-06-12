@@ -1,0 +1,29 @@
+@use "sass:map";
+@use "sass:list";
+
+$screens: (
+    // pairs of (min-width, max-width)
+    mobile: (0, 599px),
+    sm: (0, 768px),
+    tablet_portrait: (600px, 1023px),
+    md: (769px),
+    tablet_landscape: (1024px, 1368px),
+    desktop: (1369px, 1799px),
+    big_desktop: (1800px),
+);
+
+@mixin media($screen_types...) {
+    @each $screen_type in $screen_types {
+        @if list.length(map.get($screens, $screen_type))==2 {
+            @media screen and (min-width: list.nth(map.get($screens, $screen_type), 1)) and (max-width: list.nth(map.get($screens, $screen_type), 2)) {
+                @content;
+            }
+        }
+
+        @else {
+            @media screen and (min-width: list.nth(map.get($screens, $screen_type), 1)) {
+                @content;
+            }
+        }
+    }
+}

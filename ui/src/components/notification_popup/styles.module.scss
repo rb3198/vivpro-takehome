@@ -1,0 +1,22 @@
+#container {
+    position: absolute;
+    bottom: 5vh;
+    animation: fadeIn .5s ease-out;
+    background-color: black;
+    padding: 1rem;
+    color: white;
+    border-radius: .618rem;
+    left: 50%;
+    transform: translate(-50%, 0vh);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 5vh);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
