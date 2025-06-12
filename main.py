@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from typing import Union
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, status
 from starlette.exceptions import HTTPException
 import argparse
@@ -12,10 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from common.entities import ErrorResponse
 from songs.entities import PlaylistInput
-from songs.controller import songs_api
-from startup_validations import validate_json_file
+from startup_utils import add_middlewares, validate_json_file, add_startup_arguments, register_routes
 from songs.business import load_playlist
-from auth.controller import users_api, auth_api
+
+load_dotenv()
+
+ENV = os.getenv("ENV")
 
 async def load_playlist_data(playlist_path: Union[str, None]):
     if playlist_path:
@@ -41,22 +44,9 @@ async def load_playlist_data(playlist_path: Union[str, None]):
 
 # Add arg parse arguments
 parser = argparse.ArgumentParser(description="Web server for VivPro Songs")
-parser.add_argument(
-    "-pp", 
-    "--playlist_path", 
-    help="Path of the file to pre-load song data.\nIf no file path is given, the program loads an empty / already existing database."
-)
-parser.add_argument("-p", "--port", type=int, default=8000)
-parser.add_argument("--env", choices=["dev", "prod"], default="dev")
-parser.add_argument("--reload", action="store_true", help="Enable auto-reload in uvicorn")
+args = add_startup_arguments(parser)
 
-args = parser.parse_args()
-
-def register_routes(app: FastAPI):
-    app.include_router(auth_api)
-    app.include_router(songs_api)
-    app.include_router(users_api)
-
+# Setup Modules
 async def setup_modules(app: FastAPI, playlist_path: Union[str, None]):
     # pre-load data
     await load_playlist_data(playlist_path)
@@ -71,16 +61,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-#region Middlewares
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-#endregion
+# Add middlewares
+add_middlewares(app, ENV)
 
 #region Exception Handlers
 @app.exception_handler(RequestValidationError)
@@ -116,6 +98,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 #endregion
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", port=args.port, reload=args.reload)

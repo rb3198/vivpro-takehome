@@ -11,7 +11,6 @@
   "mounts": [
     "source=node_modules,target=${containerWorkspaceFolder}/ui/node_modules,type=volume"
   ],
-  "postCreateCommand": "cd ui && npm install",
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
 

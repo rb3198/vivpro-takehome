@@ -14,7 +14,7 @@ export const Analysis: React.FC = () => {
   const [activeChart, setActiveChart] = useState<"scatter" | "hist">("scatter");
   const { columnNameMap } = Track;
   const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [xCol, setXCol] = useState<keyof NumericTrack>("acousticness"); // TODO: change to IDX
+  const [xCol, setXCol] = useState<keyof NumericTrack>("acousticness");
   const [yCol, setYCol] = useState<keyof NumericTrack>("danceability");
   const { tracks: trackResource } = useContext(GlobalDataContext);
   const tracks = trackResource.read();

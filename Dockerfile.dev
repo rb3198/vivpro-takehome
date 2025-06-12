@@ -8,11 +8,16 @@ RUN apk add --no-cache git
 RUN apk add --no-cache nodejs npm
 # Install Python packages
 RUN pip install --no-cache-dir .
+# Install NPM packages
+COPY ./ui/package.json ./ui/package-lock.json ./ui/
+WORKDIR /app/ui
+RUN npm ci
 
 WORKDIR /app
-
+# node_modules folder is ignored, so it shouldn't affect node_modules in the container.
 COPY . .
 
+ENV ENV=dev
 EXPOSE 5000
 EXPOSE 5173
 
