@@ -16,29 +16,47 @@ export interface RatingProps {
 }
 
 export const Rating: React.FC<RatingProps> = (props) => {
-  const { fetch: rate, data, error, loading } = useFetch();
-  const { user } = useContext(GlobalDataContext);
+  const { fetchResult: rate, data, error, loading } = useFetch();
+  const { user, removeUser, openNotifPopup } = useContext(GlobalDataContext);
   const { rating, id, idx, userRating, setRating } = props;
   const initRating = useRef(userRating || rating);
   const [hoveredRating, setHoveredRating] = useState(-1);
 
   const handleClick = async (rating: number) => {
     setRating(rating, id, idx);
-    await rate(
-      `${TRACKS_ENDPOINT}${idx}/${id}/rating`,
-      "put",
-      JSON.stringify({
-        rating,
-      })
-    );
+    try {
+      const res = await rate(
+        `${TRACKS_ENDPOINT}${idx}/${id}/rating`,
+        "put",
+        JSON.stringify({
+          rating,
+        })
+      );
+      if (res.ok) {
+        setRating(rating, id, idx);
+        initRating.current = rating;
+        return;
+      }
+      switch (res.status) {
+        case 401:
+          removeUser();
+          openNotifPopup({
+            duration: 3000,
+            message: "Session Expired. Please login again.",
+            visible: true,
+          });
+          break;
+        default:
+          openNotifPopup({
+            duration: 3000,
+            message: "Something went wrong. Please login again.",
+            visible: true,
+          });
+          break;
+      }
+      setRating(initRating.current, id, idx);
+    } catch (err) {}
   };
-
-  useEffect(() => {
-    if (data) {
-      setRating(rating, id, idx);
-      initRating.current = rating;
-    }
-  }, [data, rating, id, idx]);
 
   useEffect(() => {
     if (error) {
