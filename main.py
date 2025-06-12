@@ -111,9 +111,9 @@ if __name__ == "__main__":
     print(ENV, LAUNCHER)
     if ENV == "dev" and LAUNCHER != "vs_code":
         process = subprocess.Popen(
-            ["npm", "run", "dev"],
-            cwd="./ui",  # Change to your frontend directory
-            shell=True   # Required on Windows for npm commands
+            "npm run dev",
+            cwd="./ui",
+            shell=True 
         )
         vite_process = process
         print(f"Vite dev server started with PID: {process.pid}")
