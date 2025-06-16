@@ -7,7 +7,6 @@ import { GlobalDataContext } from "../../contexts/global_data_context";
 type NumericTrack = Omit<Track, "id" | "title" | "userRating">;
 const PADDING_VERT = 50;
 const PADDING_LEFT = 50;
-const RADIUS = 5;
 const N_HIST_BUCKETS = 5;
 
 export const Analysis: React.FC = () => {
@@ -17,6 +16,8 @@ export const Analysis: React.FC = () => {
   const [xCol, setXCol] = useState<keyof NumericTrack>("acousticness");
   const [yCol, setYCol] = useState<keyof NumericTrack>("danceability");
   const { tracks: trackResource } = useContext(GlobalDataContext);
+  const radiusRef = useRef(5);
+  const init = useRef(false);
   const tracks = trackResource.read();
   const scaledTracks = tracks?.map((track) => ({
     ...track,
@@ -29,8 +30,9 @@ export const Analysis: React.FC = () => {
     chartWidth: number,
     chartHeight: number
   ) => {
-    const xRange = [RADIUS + PADDING_LEFT, chartWidth - RADIUS];
-    const yRange = [chartHeight - PADDING_VERT, PADDING_VERT];
+    const radius = radiusRef.current;
+    const xRange = [radius + PADDING_LEFT, chartWidth - radius];
+    const yRange = [chartHeight - PADDING_VERT, radius];
     let bucketCountMap = new Map<keyof Track, number[]>();
     const bucketCounts: number[] = [];
     for (let i = 0; i < N_HIST_BUCKETS; i++) {
@@ -124,10 +126,9 @@ export const Analysis: React.FC = () => {
             if (!bucketCounts) {
               return 0;
             }
-            // const r = range[0] - range[1];
             return (
               yRange[0] -
-              RADIUS * 2 * (++bucketCounts[Math.max(0, index - 1)] - 1)
+              radius * 2 * (++bucketCounts[Math.max(0, index - 1)] - 1)
             );
           };
 
@@ -219,17 +220,27 @@ export const Analysis: React.FC = () => {
       tick.parentNode?.removeChild(tick);
     });
     const { width } = xAxis.getBoundingClientRect();
-    const maxX = Math.max(...scaledTracks.map((track) => track[xCol]));
-    const r = maxX;
+    const values = scaledTracks.map((track) => track[xCol]);
+    let minX = Math.min(...values);
+    let maxX = Math.max(...values);
+
+    let range = maxX - minX;
     const nPoints = activeChart === "scatter" ? 12 : N_HIST_BUCKETS + 1;
+    if (range === 0) {
+      minX -= 1;
+      range += 1;
+    }
     const ticks: { pos: number; value: number }[] = [];
+
     for (let i = 0; i < nPoints; i++) {
-      const normalized = i / (nPoints - 1);
+      const normalized = i / (nPoints - 1); // value from 0 to 1
+      const actualValue = minX + normalized * range;
       ticks.push({
         pos: width * normalized,
-        value: r * normalized,
+        value: actualValue,
       });
     }
+
     for (let i = 0; i < ticks.length; i++) {
       const tick = document.createElement("div");
       const valueNode = document.createElement("p");
@@ -268,7 +279,7 @@ export const Analysis: React.FC = () => {
       const normalized = i / nPoints;
       ticks.push({
         pos: height * (1 - normalized),
-        value: r * normalized,
+        value: minY + r * normalized,
       });
     }
     for (let i = 0; i < ticks.length; i++) {
@@ -305,6 +316,7 @@ export const Analysis: React.FC = () => {
     if (!scaledTracks || !scaledTracks.length || !chartContainerRef.current) {
       return;
     }
+    const radius = radiusRef.current;
     const { width: chartWidth, height: chartHeight } =
       chartContainerRef.current.getBoundingClientRect();
     const t = d3.transition().duration(1000);
@@ -319,14 +331,14 @@ export const Analysis: React.FC = () => {
             .append("circle")
             .attr("cx", (d) => x(d[xCol]))
             .attr("cy", (d) => y(d[activeChart === "scatter" ? yCol : xCol]))
-            .call((enter) => enter.transition(t).attr("r", RADIUS)),
+            .call((enter) => enter.transition(t).attr("r", radius)),
         (update) =>
           update
             .transition(t)
-            .delay((_, i) => i * RADIUS)
+            .delay((_, i) => i * radius)
             .attr("cx", (d) => x(d[xCol]))
             .attr("cy", (d) => y(d[activeChart === "scatter" ? yCol : xCol]))
-            .call((update) => update.transition().attr("r", RADIUS)),
+            .call((update) => update.transition().attr("r", radius)),
         (exit) => exit.remove()
       )
       .on("mouseover", (event, d) => {
@@ -335,7 +347,17 @@ export const Analysis: React.FC = () => {
           .style("left", event.pageX + 10 + "px");
         tooltip.style("display", "block");
         tooltip.html(
-          `<p> <span>Title:</span> ${d["title"]} <br> <span>${columnNameMap[xCol]}:</span> ${d[xCol]}</p>`
+          `<p> <span>Title:</span> ${d["title"]} <br> <span>${
+            columnNameMap[xCol]
+          }:</span> ${d[xCol]}</p>
+          ${
+            activeChart === "scatter"
+              ? `
+            <p><span>${columnNameMap[yCol]}:</span> ${d[yCol]}</p>
+            `
+              : ""
+          }
+          `
         );
       })
       .on("mouseout", () => tooltip.style("display", "none"));
@@ -348,10 +370,14 @@ export const Analysis: React.FC = () => {
     const { height, width } = chartContainerRef.current.getBoundingClientRect();
     const svg = d3.select("#" + styles.chart_container);
     if (svg.select("svg").empty()) {
+      if (init.current) {
+        return;
+      }
       svg.append("svg").attr("width", width).attr("height", height);
+      radiusRef.current = (height - PADDING_VERT) / (2 * tracks.length);
     }
+    init.current = true;
 
-    // d3.select("#" + styles.chart_container + " > svg").remove();
     renderPlot(svg.select("svg"));
   }, [xCol, yCol, activeChart, scaledTracks]);
 
