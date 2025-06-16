@@ -5,6 +5,7 @@ interface StarProps extends React.SVGProps<SVGSVGElement> {
   fillPercentage: number;
   filledClassName: string;
   emptyClassName: string;
+  svgClassName?: string;
   setRating: (rating: number) => any;
   setHoveredRating: (rating: number) => any;
   disabled?: boolean;
@@ -17,6 +18,7 @@ export const Star: React.FC<StarProps> = (props) => {
     filledClassName,
     emptyClassName,
     disabled,
+    svgClassName,
     setHoveredRating,
     setRating,
   } = props;
@@ -31,6 +33,7 @@ export const Star: React.FC<StarProps> = (props) => {
     "className",
     "filledClassName",
     "emptyClassName",
+    "svgClassName",
     "disabled",
     "fillPercentage",
   ]);
@@ -52,6 +55,7 @@ export const Star: React.FC<StarProps> = (props) => {
       onMouseOver={onMouseOver}
       onMouseOut={onMouseOut}
       style={{ cursor: disabled ? "default" : "pointer" }}
+      className={svgClassName}
       onClick={handleClick}
     >
       <defs>
