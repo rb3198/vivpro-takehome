@@ -14,6 +14,10 @@
     display: none;
 }
 
+.star {
+    flex-shrink: 0;
+}
+
 .filled {
     @include themed() {
         fill: getThemeColor("third");
@@ -28,15 +32,23 @@
     }
 }
 
+.empty {
+    fill: transparent;
+    @include themed() {
+        stroke: getThemeColor("text_0");
+    }
+}
+
 .you_rated_label {
     font-size: .618rem;
     opacity: 0;
-    margin-left: .309rem;
+    margin-left: .618rem;
     padding: .309rem;
     text-transform: uppercase;
     width: 4rem;
     border-radius: .309rem;
     font-weight: 600;
+    flex-shrink: 0;
     @include themed() {
         background-color:  color.adjust(getThemeColor("text_1"), $lightness: 25%);
         color: getThemeColor("bg_0");
@@ -47,16 +59,14 @@
     opacity: 1;
 }
 
-.empty {
-    fill: transparent;
-    @include themed() {
-        stroke: getThemeColor("text_0");
-    }
-}
-
 .loader {
     animation: rotate .5s ease-in-out infinite;
-    margin-left: .309rem;
+    margin-right: .618rem;
+    opacity: 0;
+}
+
+.loader[data-visible="true"] {
+    opacity: 1;
 }
 
 @keyframes rotate {

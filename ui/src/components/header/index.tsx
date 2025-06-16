@@ -8,16 +8,13 @@ import { BiX } from "react-icons/bi";
 import { Theme } from "../../theme";
 import { Link, useLocation } from "react-router-dom";
 import { GlobalDataContext } from "../../contexts/global_data_context";
-import { useFetch } from "../../hooks/useFetch";
-import { LOGIN_ENDPOINT } from "../../constants/endpoints";
 
 export interface HeaderProps extends ThemedProps {}
 
 export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [logoutVisible, setLogoutVisible] = useState(false);
-  const { user, removeUser, openNotifPopup } = useContext(GlobalDataContext);
-  const { fetchResult } = useFetch();
+  const { user, logout } = useContext(GlobalDataContext);
   const { pathname } = useLocation();
   const toggleMenuOpen = () => {
     setMenuOpen((prevState) => {
@@ -36,26 +33,6 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
     setLogoutVisible((prev) => !prev);
   };
 
-  const onLogoutClick = async () => {
-    try {
-      openNotifPopup({ duration: 1000, message: "Logging out", visible: true });
-      const res = await fetchResult(LOGIN_ENDPOINT, "delete");
-      if (res.ok) {
-        removeUser();
-        openNotifPopup({
-          duration: 1000,
-          message: "Logged out!",
-          visible: true,
-        });
-      }
-    } catch (error) {
-      openNotifPopup({
-        duration: 1000,
-        message: "Something went wrong. Please try again.",
-        visible: true,
-      });
-    }
-  };
   const renderMenu = () => {
     return (
       <>
@@ -85,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
                 <span
                   id={styles.logout}
                   data-visible={logoutVisible}
-                  onClick={onLogoutClick}
+                  onClick={logout}
                 >
                   Logout
                 </span>

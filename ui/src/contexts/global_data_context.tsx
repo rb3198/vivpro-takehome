@@ -7,10 +7,11 @@ import React, {
 } from "react";
 import { Track } from "../types/track";
 import { SongResponse } from "../types/song_response";
-import { TRACKS_ENDPOINT } from "../constants/endpoints";
+import { SESSION_ENDPOINT, TRACKS_ENDPOINT } from "../constants/endpoints";
 import { USER_STORAGE_KEY } from "../constants/storage";
 import { UserInfo } from "../types/user_info";
 import { useFetch } from "../hooks/useFetch";
+import { HttpCodes } from "../types/enum/http_codes";
 
 type Resource<T> = {
   read: () => T;
@@ -67,6 +68,13 @@ export const GlobalDataContext = createContext<{
   setUser: (user: UserInfo) => void;
   removeUser: () => void;
   openNotifPopup: (config: NotifPopupConfig) => void;
+  login: (
+    username: string,
+    password: string,
+    onSuccess?: () => unknown,
+    onFailure?: (message: string) => unknown
+  ) => Promise<void>;
+  logout: () => Promise<void>;
 }>({
   tracks: emptyTracksPromise,
   notifPopupConfig: defaultNotifPopupConfig,
@@ -75,6 +83,8 @@ export const GlobalDataContext = createContext<{
   setUser: () => {},
   removeUser: () => {},
   openNotifPopup: () => {},
+  login: () => new Promise((resolve) => resolve()),
+  logout: () => new Promise((resolve) => resolve()),
 });
 
 export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
@@ -119,7 +129,10 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     const queryString = `?offset=0&limit=100${
       (title && `&title=${title}`) || ""
     }`;
-    const trackPromise = fetchResult(TRACKS_ENDPOINT + queryString, "get")
+    const trackPromise: Promise<Track[]> = fetchResult(
+      TRACKS_ENDPOINT + queryString,
+      "get"
+    )
       .then(async (res) => {
         if (res.ok) {
           const songResponses = (await res.json()) as SongResponse[];
@@ -136,6 +149,12 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
             res.text(),
             res.statusText
           );
+          if (res.status === HttpCodes.Unauthorized) {
+            removeUser();
+            // Retry without user
+            fetchTracks();
+            return [];
+          }
           throw new Error(
             "Failed to fetch tracks. Something went wrong, please try again."
           );
@@ -165,6 +184,77 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     }, duration);
   };
 
+  const login = async (
+    username: string,
+    password: string,
+    onSuccess?: () => unknown,
+    onFailure?: (message: string) => unknown
+  ) => {
+    try {
+      const res = await fetchResult(
+        SESSION_ENDPOINT,
+        "post",
+        JSON.stringify({ username, password })
+      );
+      if (res.ok) {
+        setUser({
+          username,
+          name: "",
+        });
+        onSuccess && onSuccess();
+        fetchTracks();
+      } else {
+        if (res.headers.get("Content-Type") === "application/json") {
+          const error = await res.json();
+          "message" in error && onFailure && onFailure(error.message);
+        } else {
+          onFailure &&
+            onFailure(
+              res.status === HttpCodes.Unauthorized
+                ? "Invalid Credentials"
+                : "An unknown error"
+            );
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      if (typeof error === "object" && error && onFailure) {
+        const message =
+          "message" in error && typeof error.message === "string"
+            ? error.message
+            : "Something went wrong, Please try again.";
+        onFailure(message);
+      }
+    }
+  };
+
+  const logout = async () => {
+    const onError = () => {
+      openNotifPopup({
+        duration: 1000,
+        message: "Something went wrong. Please try again.",
+        visible: true,
+      });
+    };
+    try {
+      openNotifPopup({ duration: 1000, message: "Logging out", visible: true });
+      const res = await fetchResult(SESSION_ENDPOINT, "delete");
+      if (res.ok) {
+        removeUser();
+        openNotifPopup({
+          duration: 1000,
+          message: "Logged out!",
+          visible: true,
+        });
+        fetchTracks();
+      } else {
+        onError();
+      }
+    } catch (error) {
+      onError();
+    }
+  };
+
   const value = {
     user,
     tracks: trackResource,
@@ -174,6 +264,8 @@ export const GlobalDataContextProvider: React.FC<PropsWithChildren> = ({
     setUser,
     removeUser,
     openNotifPopup,
+    login,
+    logout,
   };
 
   return (

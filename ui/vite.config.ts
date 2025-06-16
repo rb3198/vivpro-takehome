@@ -12,6 +12,7 @@ export default defineConfig({
         target: DEV_API_SERVER_ADDR,
       },
     },
+    host: true,
     watch: {
       usePolling: true,
     },

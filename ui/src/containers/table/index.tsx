@@ -122,7 +122,7 @@ const Table: React.FC<TableProps> = (props) => {
         (track) => track.id === id && track.idx === idx
       );
       if (trackIdx > -1) {
-        tracks[trackIdx].rating = rating;
+        tracks[trackIdx].userRating = rating;
         updateTracks([...tracks]);
       }
     },
