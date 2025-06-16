@@ -3,7 +3,7 @@ import styles from "./styles.module.scss";
 import { Field } from "../../../types/auth";
 import { useFetch } from "../../../hooks/useFetch";
 import { Form } from "../form";
-import { LOGIN_ENDPOINT, USER_ENDPOINT } from "../../../constants/endpoints";
+import { SESSION_ENDPOINT, USER_ENDPOINT } from "../../../constants/endpoints";
 import {
   validateName,
   validatePassword,
@@ -33,7 +33,7 @@ export const Register: React.FC<RegisterProps> = () => {
         outerRes = res;
         // Registration Successful, proceed to login.
         const loginRes = await fetch(
-          LOGIN_ENDPOINT,
+          SESSION_ENDPOINT,
           "post",
           JSON.stringify({
             username: fields.username,

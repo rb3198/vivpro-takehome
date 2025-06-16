@@ -3,7 +3,7 @@ import styles from "./styles.module.scss";
 import { Field } from "../../../types/auth";
 import { useFetch } from "../../../hooks/useFetch";
 import { Form } from "../form";
-import { LOGIN_ENDPOINT } from "../../../constants/endpoints";
+import { SESSION_ENDPOINT } from "../../../constants/endpoints";
 import { validatePassword, validateUsername } from "../field_validations";
 import { GlobalDataContext } from "../../../contexts/global_data_context";
 import { useNavigate } from "react-router-dom";
@@ -23,7 +23,7 @@ export const Login: React.FC<LoginProps> = () => {
   const { fetchResult: fetch, loading } = useFetch<boolean>();
   const onSubmit = async (fields: Record<keyof LoginFields, string>) => {
     try {
-      const res = await fetch(LOGIN_ENDPOINT, "post", JSON.stringify(fields));
+      const res = await fetch(SESSION_ENDPOINT, "post", JSON.stringify(fields));
       if (res.ok) {
         setUser({
           username: fields.username,

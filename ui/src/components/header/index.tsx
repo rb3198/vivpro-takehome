@@ -9,7 +9,7 @@ import { Theme } from "../../theme";
 import { Link, useLocation } from "react-router-dom";
 import { GlobalDataContext } from "../../contexts/global_data_context";
 import { useFetch } from "../../hooks/useFetch";
-import { LOGIN_ENDPOINT } from "../../constants/endpoints";
+import { SESSION_ENDPOINT } from "../../constants/endpoints";
 
 export interface HeaderProps extends ThemedProps {}
 
@@ -39,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({ theme, toggleTheme }) => {
   const onLogoutClick = async () => {
     try {
       openNotifPopup({ duration: 1000, message: "Logging out", visible: true });
-      const res = await fetchResult(LOGIN_ENDPOINT, "delete");
+      const res = await fetchResult(SESSION_ENDPOINT, "delete");
       if (res.ok) {
         removeUser();
         openNotifPopup({
