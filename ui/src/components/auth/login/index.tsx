@@ -1,9 +1,7 @@
 import React, { useContext, useState } from "react";
 import styles from "./styles.module.scss";
 import { Field } from "../../../types/auth";
-import { useFetch } from "../../../hooks/useFetch";
 import { Form } from "../form";
-import { SESSION_ENDPOINT } from "../../../constants/endpoints";
 import { validatePassword, validateUsername } from "../field_validations";
 import { GlobalDataContext } from "../../../contexts/global_data_context";
 import { useNavigate } from "react-router-dom";
@@ -16,39 +14,16 @@ type LoginFields = {
 };
 
 export const Login: React.FC<LoginProps> = () => {
-  const [submissionError, setsubmissionError] = useState("");
-  const { setUser } = useContext(GlobalDataContext);
+  const [submissionError, setSubmissionError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { login } = useContext(GlobalDataContext);
   const navigate = useNavigate();
 
-  const { fetchResult: fetch, loading } = useFetch<boolean>();
   const onSubmit = async (fields: Record<keyof LoginFields, string>) => {
-    try {
-      const res = await fetch(SESSION_ENDPOINT, "post", JSON.stringify(fields));
-      if (res.ok) {
-        setUser({
-          username: fields.username,
-          name: "",
-        });
-        navigate("/");
-      } else {
-        if (res.headers.get("Content-Type") === "application/json") {
-          const error = await res.json();
-          "message" in error && setsubmissionError(error.message);
-        } else {
-          setsubmissionError(
-            res.status === 401 ? "Invalid Credentials" : "An unknown error"
-          );
-        }
-      }
-    } catch (error) {
-      if (typeof error === "object" && error) {
-        const message =
-          "message" in error && typeof error.message === "string"
-            ? error.message
-            : "Something went wrong, Please try again.";
-        setsubmissionError(message);
-      }
-    }
+    const { username, password } = fields;
+    setLoading(true);
+    await login(username, password, () => navigate("/"), setSubmissionError);
+    setLoading(false);
   };
   const fields: LoginFields = {
     username: {

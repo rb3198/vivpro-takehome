@@ -103,7 +103,7 @@ export const Rating: React.FC<RatingProps> = (props) => {
         {loading && <RiLoader3Line className={styles.loader} />}
         <p
           className={styles.you_rated_label}
-          data-present={userRating === finalRating}
+          data-present={userRating > 0 && userRating === finalRating}
         >
           {(userRating === finalRating && "You Rated") || ""}
         </p>
