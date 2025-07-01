@@ -19,7 +19,6 @@ async def service_get_songs(
     offset: int = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 10
 ):
-    # Auth failure validation
     validate_get_songs_req(order_by, title)
     user_id = session['user_id'] if session and 'user_id' in session else ''
     return await get_songs(title, user_id, order_by, order, offset, limit)

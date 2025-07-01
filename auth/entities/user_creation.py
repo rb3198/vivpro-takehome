@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 username_pattern = re.compile(r'^[0-9a-zA-Z_-]+$')
 name_pattern = re.compile(r'^[0-9a-zA-Z \.\-\']+$')
@@ -25,3 +25,9 @@ class UserCreation(BaseModel):
         description=
         'A password must contain a lowercase, an uppercase, a digit, and a special character. No whitespaces allowed',
     )
+
+    @field_validator("name")
+    def no_all_spaces(cls, v):
+        if v.strip() == "":
+            raise ValueError("Name cannot be only spaces.")
+        return v
